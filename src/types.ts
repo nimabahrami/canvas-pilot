@@ -12,7 +12,9 @@ export interface DraftImage { editState?: EditState; id: string; dataUrl: string
 export interface AppendPayload { sessionId?: string; title: string; prompt: string; originalPrompt?: string; images: DraftImage[] }
 export interface CaptureSource { id: string; name: string; thumbnail: string; kind: 'window' | 'screen' }
 export interface CaptureResult { dataUrl: string; context: CaptureContext; savedSession?: Session }
-export interface CaptionDraft { image: DraftImage; caption: string; sessionId?: string; sessionTitle: string }
+export interface CaptureTarget { sessionId?: string; sessionTitle: string }
+export interface CaptureSession { id: string; title: string; updatedAt: string; entries: number }
+export interface CaptionDraft extends CaptureTarget { image: DraftImage; caption: string }
 export interface EnhancedEntry { id: string; prompt: string }
 export interface JournalEnhancement { session: Session; entries: EnhancedEntry[] }
 export interface CaptureAccess { platform: string; status: string; appName: string; appPath: string; packaged: boolean }

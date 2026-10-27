@@ -67,7 +67,7 @@ Run `npm run dev:web`. The preview stores its library in IndexedDB and exports a
 ## The workflow
 
 1. **Capture.** Click **Capture area** to choose a window or display, or use the background shortcut. Drag the area you want.
-2. **Clarify.** Add markup and a caption describing the change. Enlarge the editor when you need more room.
+2. **Clarify.** Add markup and a caption describing the change. Use the session pill at the top of the caption popup to select an existing journal or name a new one. Enlarge the editor when you need more room.
 3. **Collect.** Keep capturing from other windows or pages in the same session. Click a saved screenshot to edit its annotations.
 4. **Enhance, optionally.** Use the bottom-right orb to improve the complete saved journal. Review and edit the proposed text before copying or applying it.
 5. **Hand off.** Open **Export**, choose a format, and copy or save the journal for your AI assistant.

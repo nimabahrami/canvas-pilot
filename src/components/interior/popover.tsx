@@ -220,6 +220,7 @@ export type PopoverProps = {
   trigger: React.ReactNode;
   children: React.ReactNode;
   label: string;
+  disabled?: boolean;
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -237,6 +238,7 @@ export function Popover({
   trigger,
   children,
   label,
+  disabled = false,
   open: controlled,
   defaultOpen = false,
   onOpenChange,
@@ -316,6 +318,7 @@ export function Popover({
         aria-label={label}
         ref={anchorRef}
         type="button"
+        disabled={disabled}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? id : undefined}

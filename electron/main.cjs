@@ -142,6 +142,10 @@ async function startCapture(sourceId, target = {}) {
   const result = new Promise(resolve => { resolveCapture = resolve; });
   const state = activeCapture = {
     info: null, committing: false, saving: false, image: null,
+    async sessions() {
+      if (state.info?.mode !== 'caption') throw new Error('Select an area before choosing a session.');
+      return (await captureStore.load()).map(session => ({ id: session.id, title: session.title, updatedAt: session.updatedAt, entries: session.entries.length }));
+    },
     async finish(value) {
       if (activeCapture !== state || state.finishing) return;
       state.finishing = true;
@@ -154,10 +158,12 @@ async function startCapture(sourceId, target = {}) {
     async save(input) {
       if (!state.image || state.saving) throw new Error('A capture is not ready to save.');
       if (typeof input?.caption !== 'string' || input.caption.length > 50000) throw new Error('Keep the caption under 50,000 characters.');
+      if (typeof input.sessionTitle !== 'string' || input.sessionTitle.length > 120 || (input.sessionId !== undefined && (typeof input.sessionId !== 'string' || !/^[a-zA-Z0-9-]{1,128}$/.test(input.sessionId)))) throw new Error('Choose a valid session or a new session name under 120 characters.');
       state.saving = true;
       try {
         const image = { ...input.image, id: state.image.id, width: state.image.width, height: state.image.height, context: state.image.context };
-        const savedSession = await captureStore.append({ sessionId, title: sessionTitle, prompt: input.caption, images: [image] });
+        const title = input.sessionId ? captureStore.get(input.sessionId).title : input.sessionTitle.trim();
+        const savedSession = await captureStore.append({ sessionId: input.sessionId, title, prompt: input.caption, images: [image] });
         await state.finish({ dataUrl: image.dataUrl, context: image.context, savedSession });
       } finally { state.saving = false; }
     },
@@ -232,7 +238,7 @@ async function startCapture(sourceId, target = {}) {
         }
         const image = source.thumbnail.crop(region);
         state.image = { id: randomUUID(), name: 'capture.png', dataUrl: image.toDataURL(), ...image.getSize(), context };
-        state.info = { mode: 'caption', image: state.image, sessionId, sessionTitle: sessionTitle || 'New session' };
+        state.info = { mode: 'caption', image: state.image, sessionId, sessionTitle };
         resizeCaptureCard(false);
         captureWindow.webContents.send('capture:stage', state.info);
         showWindow(captureWindow);
@@ -275,11 +281,12 @@ async function openCaptureOverlay(bounds) {
   if (activeCapture === state) showWindow(captureWindow);
 }
 function setupCaptureIPC() {
-  for (const channel of ['frame', 'complete', 'cancel', 'save', 'resize', 'open-settings']) ipcMain.handle(`capture:${channel}`, (event, input) => {
+  for (const channel of ['frame', 'complete', 'cancel', 'save', 'sessions', 'resize', 'open-settings']) ipcMain.handle(`capture:${channel}`, (event, input) => {
     if (!trustedSender(captureWindow, event)) throw new Error('Untrusted capture request.');
     if (channel === 'frame') return activeCapture.info;
     if (channel === 'cancel') { if (!activeCapture.committing && !activeCapture.saving) return activeCapture.finish(null); return; }
     if (channel === 'save') return activeCapture.save(input);
+    if (channel === 'sessions') return activeCapture.sessions();
     if (channel === 'resize') {
       if (activeCapture.info.mode !== 'caption' || typeof input?.editing !== 'boolean' || typeof input?.expanded !== 'boolean' || (input.expanded && !input.editing)) throw new Error('Choose a valid editor size.');
       resizeCaptureCard(input.editing, input.expanded, true); return;

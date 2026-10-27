@@ -5,10 +5,10 @@ import { QuickCopy } from './components/quick-copy';
 import { RegionPicker, type Region } from './components/region-picker';
 import { CaptureCaption } from './components/capture-caption';
 import { Button } from './components/ui/button';
-import type { DraftImage } from './types';
+import type { CaptureSession, CaptureTarget, DraftImage } from './types';
 import './styles.css';
 type CaptureFrame = { mode: 'selection'; source?: string; liveSize?: { width: number; height: number }; liveOffset?: { x: number; y: number }; immediate?: boolean; sourceTitle?: string } | { mode: 'caption'; image: DraftImage; sessionId?: string; sessionTitle: string } | { mode: 'error'; message: string; permission: boolean };
-declare global { interface Window { captureOverlay?: { frame(): Promise<CaptureFrame>; complete(region: Region): Promise<void>; cancel(): Promise<void>; save(input: { image: DraftImage; caption: string }): Promise<void>; resize(input: { editing: boolean; expanded: boolean }): Promise<void>; openSettings(): Promise<void>; onStage(callback: (frame: CaptureFrame) => void): () => void } } }
+declare global { interface Window { captureOverlay?: { frame(): Promise<CaptureFrame>; complete(region: Region): Promise<void>; cancel(): Promise<void>; save(input: CaptureTarget & { image: DraftImage; caption: string }): Promise<void>; sessions(): Promise<CaptureSession[]>; resize(input: { editing: boolean; expanded: boolean }): Promise<void>; openSettings(): Promise<void>; onStage(callback: (frame: CaptureFrame) => void): () => void } } }
 function CaptureOverlay() {
   const [frame, setFrame] = useState<CaptureFrame | null>(null), [error, setError] = useState('');
   useEffect(() => {
@@ -19,7 +19,7 @@ function CaptureOverlay() {
   }, []);
   const cancel = () => { void window.captureOverlay?.cancel(); };
   if (frame?.mode === 'error' || error) return <section className="capture-card capture-error"><h1>Capture unavailable</h1><p role="alert">{frame?.mode === 'error' && frame.permission ? 'Enable CanvasPilot in Screen Recording settings, then restart the app.' : frame?.mode === 'error' ? frame.message : error}</p>{frame?.mode === 'error' && frame.permission && <Button onClick={() => void window.captureOverlay?.openSettings()}>Open System Settings</Button>}<Button onClick={cancel}>Close</Button></section>;
-  if (frame?.mode === 'caption') return <CaptureCaption image={frame.image} sessionId={frame.sessionId} sessionTitle={frame.sessionTitle} onSave={(image, caption) => window.captureOverlay!.save({ image, caption })} onCancel={cancel} onResize={(editing, expanded) => window.captureOverlay!.resize({ editing, expanded })} />;
+  if (frame?.mode === 'caption') return <CaptureCaption image={frame.image} sessionId={frame.sessionId} sessionTitle={frame.sessionTitle} loadSessions={window.captureOverlay!.sessions} onSave={(image, caption, target) => window.captureOverlay!.save({ image, caption, ...target })} onCancel={cancel} onResize={(editing, expanded) => window.captureOverlay!.resize({ editing, expanded })} />;
   return frame ? <RegionPicker {...frame} onSelect={region => { window.captureOverlay?.complete(region).catch(error => setError(String(error))); }} onCancel={cancel} /> : <div className="startup-state">Preparing capture…</div>;
 }
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { error: string }> {

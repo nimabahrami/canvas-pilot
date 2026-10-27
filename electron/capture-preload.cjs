@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('captureOverlay', {
   complete: region => ipcRenderer.invoke('capture:complete', region),
   cancel: () => ipcRenderer.invoke('capture:cancel'),
   save: input => ipcRenderer.invoke('capture:save', input),
+  sessions: () => ipcRenderer.invoke('capture:sessions'),
   resize: input => ipcRenderer.invoke('capture:resize', input),
   openSettings: () => ipcRenderer.invoke('capture:open-settings'),
   onStage: callback => {

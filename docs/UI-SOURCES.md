@@ -33,3 +33,5 @@ The settings model picker composes the existing Interior Command Palette with a 
 Session rename retains the approved Input primitive with a single 1 px focus border and no stacked ring/shadow. Its Interior motion runs sequential 80 ms exit/entry phases to avoid overlapping title and input text.
 
 Journal enhancement review composes the approved Dialog, Interior Segmented Control/surface motion, and Cult Halo buttons with an application textarea form. The shared Popover retains its scroll constraint during positioning. Session rows add a separate Halo delete action. Flat native chrome follows [Electron custom title bars](https://www.electronjs.org/docs/latest/tutorial/custom-title-bar); native window controls are OS components. The toolbar logo and desktop icon derive from Nima Bahrami's supplied doodle.
+
+The capture-caption header adds a compact destination pill using Interior Popover, Cult Halo buttons, and the shared Input primitive. It searches saved session summaries or stages a new name without creating an empty session. The list and new-session form use the shared surface transitions, respect reduced motion, and fit within the existing 420 px popup.
